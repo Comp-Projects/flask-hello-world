@@ -18,7 +18,7 @@ except Exception as e:
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render('index.html')
 
 @app.route('/query', methods=['POST'])
 def query():
