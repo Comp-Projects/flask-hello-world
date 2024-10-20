@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Court Judgment Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ffffff 0%, #f6f6f6 47%, #ededed 100%);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #phone-wrapper {
+            width: 360px;
+            height: 720px;
+            position: relative;
+            background: url("https://cdn.pixabay.com/photo/2017/06/17/10/39/cell-phone-2411808_960_720.png") 0 0 no-repeat;
+            overflow: hidden;
+        }
+        #app {
+            background: #ffffff;
+            background-image: url("https://www.transparenttextures.com/patterns/asfalt-light.png");
+            position: relative;
+            top: 47px;
+            left: 19px;
+            height: 608px;
+            width: 325px;
+            display: grid;
+            grid-template-rows: 50px 1fr auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .bg-dark {
+            background: hsl(231, 50%, 50%);
+        }
+        .bg-light {
+            background: hsla(231, 10%, 90%, 0.8);
+        }
+        .text-light {
+            color: #f0f0f0;
+        }
+        h2 {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            color: #ffffff;
+        }
+        #header {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: auto;
+            align-items: center;
+        }
+        #message-board {
+            display: grid;
+            align-self: end;
+            grid-auto-rows: minmax(min-content, max-content);
+            padding: 5px;
+            box-sizing: border-box;
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        .chat-bubble {
+            border-radius: 20px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: inline-block;
+            max-width: 80%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .user-bubble {
+            background-color: #0078d7;
+            color: #ffffff;
+            align-self: flex-end;
+        }
+        .bot-bubble {
+            background-color: #e1e1e1;
+            color: #333333;
+            align-self: flex-start;
+        }
+        #form {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #f8f8f8;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+        }
+        #user_input {
+            flex: 1;
+            border: solid 1px #cccccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            min-width: 0;
+        }
+        #user_input:focus {
+            border-color: #0078d7;
+            outline: none;
+        }
+        #submit {
+            background: #FF9800;
+            border: none;
+            padding: 10px 15px;
+            font-size: 1rem;
+            color: #ffffff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        #submit:hover {
+            background: #e68a00;
+        }
+        #language {
+            margin-right: 10px;
+            font-size: 1rem;
+        }
+        /* Loader styles */
+        #loader {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        .loader-circle {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #0078d7;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #password-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+        #password-box {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        #password-box input {
+            padding: 10px;
+            width: 100%;
+            border: solid 1px #cccccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        #password-box button {
+            background-color: #FF9800;
+            border: none;
+            padding: 10px;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Password Screen -->
+    <div id="password-screen">
+        <div id="password-box">
+            <h3>Enter Password</h3>
+            <input type="password" id="password" placeholder="Enter password">
+            <button id="password-submit">Submit</button>
+            <p id="password-error" style="color: red; display: none;">Incorrect password!</p>
+        </div>
+    </div>
+    <div id="phone-wrapper">
+        <div id="app">
+            <div id="header" class="bg-dark">
+                <div class="text-light align-center"><h3>Court Judgment Chatbot</h3></div>
+            </div>
+            <div id="message-board" class="chat-log"></div>
+            <div id="form" class="bg-light">
+                <select id="language">
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Marathi">Marathi</option>
+                    <option value="Bengali">Bengali</option>
+                    <option value="Telugu">Telugu</option>
+                    <option value="Tamil">Tamil</option>
+                    <option value="Kannada">Kannada</option>
+                    <option value="Malayalam">Malayalam</option>
+                    <option value="Gujarati">Gujarati</option>
+                </select>
+                <input type="text" id="user_input" placeholder="🔍 Enter your query about a court case:">
+                <button id="submit">Submit</button>
+            </div>
+            <div id="loader">
+                <div class="loader-circle"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+         // Define the password
+         const correctPassword = "123456";
+
+         // Password submission logic
+         document.getElementById('password-submit').onclick = function() {
+             const enteredPassword = document.getElementById('password').value;
+             const passwordError = document.getElementById('password-error');
+             
+             if (enteredPassword === correctPassword) {
+                 // Hide password screen and show the chatbot
+                 document.getElementById('password-screen').style.display = 'none';
+                 document.getElementById('phone-wrapper').style.display = 'block';
+             } else {
+                 // Show error message
+                 passwordError.style.display = 'block';
+             }
+         };
+        document.getElementById('submit').onclick = function() {
+            const userInput = document.getElementById('user_input').value;
+            const language = document.getElementById('language').value;
+            const loader = document.getElementById('loader');
+
+            // Show loader
+            loader.style.display = 'flex';
+
+            // Set a timer for at least 1 second (1000ms)
+            const loaderTimeout = setTimeout(() => {
+                loader.style.display = 'flex';
+            }, 1000); // Show loader for at least 1 second
+
+            fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'query': userInput,
+                    'language': language
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const chatLog = document.getElementById('message-board');
+                chatLog.innerHTML += `<div class="chat-bubble user-bubble">${userInput}</div>`;
+                if (data.error) {
+                    chatLog.innerHTML += `<div class="chat-bubble bot-bubble">${data.error}</div>`;
+                } else {
+                    chatLog.innerHTML += `<div class="chat-bubble bot-bubble">${data.response}</div>`;
+                }
+                document.getElementById('user_input').value = ''; // Clear input field
+                chatLog.scrollTop = chatLog.scrollHeight; // Scroll to the bottom
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            })
+            .finally(() => {
+                clearTimeout(loaderTimeout); // Clear the loader timeout
+                // Hide loader
+                loader.style.display = 'none';
+            });
+        };
+    </script>
+</body>
+</html>
