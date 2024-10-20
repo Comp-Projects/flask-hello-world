@@ -9,7 +9,7 @@ app = Flask(__name__)
 translator = Translator()
 
 # Load the CSV file
-csv_file_path = "C:/Users/HP/OneDrive/Desktop/Weather/judgments.csv"  # Update this path
+csv_file_path = "../judgments.csv"  # Update this path
 try:
     df = pd.read_csv(csv_file_path)
 except Exception as e:
